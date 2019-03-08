@@ -34,7 +34,7 @@ int main(int argc, char* args[]) {
 
 	bool quit = false;
 	gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	gScreenSurface = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+	gScreenSurface = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_PRESENTVSYNC);
 
 	//Event handler
 	SDL_Event event;
@@ -61,7 +61,7 @@ int main(int argc, char* args[]) {
 	//***GAME LOOP***
 	while (!quit)
 	{ 
-		SDL_Delay(1);
+		
 		const Uint8 *state = SDL_GetKeyboardState(NULL);								// const state
 		//INPUT INFO		
 		while (SDL_PollEvent(&event) != 0)												//Handle events on queue
