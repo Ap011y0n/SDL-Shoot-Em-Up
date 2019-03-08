@@ -15,7 +15,7 @@ const float SCREEN_HEIGHT = 640;
 
 
 int main(int argc, char* args[]) {
-//	int SDL_Init(SDL_INIT_VIDEO);
+	int SDL_Init(SDL_INIT_VIDEO);
 	int IMG_Init(IMG_INIT_PNG);
 
 
@@ -35,8 +35,10 @@ int main(int argc, char* args[]) {
 	bool quit = false;
 	gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	gScreenSurface = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+
 	//Event handler
 	SDL_Event event;
+
 	rectangle.x = 20;
 	rectangle.y = 20;
 	rectangle.w = 200;
@@ -46,6 +48,15 @@ int main(int argc, char* args[]) {
 	projectile.y = rectangle.y + 30;
 	projectile.w = 100;
 	projectile.h = 40;
+
+	SDL_Surface *image;
+	image = IMG_Load("Assets/shrek.png");
+	if (!image) {
+		quit = true;
+
+	}
+
+
 
 	//***GAME LOOP***
 	while (!quit)

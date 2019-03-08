@@ -1,4 +1,4 @@
 ﻿  Main.cpp
 c:\users\albertgb7\desktop\rectangulo rojo\main.cpp(36): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
-c:\users\albertgb7\desktop\rectangulo rojo\main.cpp(148): warning C4244: '+=': conversion from 'float' to 'int', possible loss of data
+c:\users\albertgb7\desktop\rectangulo rojo\main.cpp(159): warning C4244: '+=': conversion from 'float' to 'int', possible loss of data
   Rectangulo.vcxproj -> C:\Users\albertgb7\Desktop\Rectangulo rojo\Debug\Rectangulo.exe
