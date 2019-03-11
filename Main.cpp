@@ -53,8 +53,8 @@ int main(int argc, char* args[]) {
 */
 	SrcR.x = 0;
 	SrcR.y = 0;
-	SrcR.w = 244;
-	SrcR.h = 244;
+	SrcR.w = 580;
+	SrcR.h = 793;
 
 	DestR.x = 20;
 	DestR.y = 20;
