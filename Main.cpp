@@ -2,21 +2,26 @@
 
 #include <stdio.h>
 #include <string>
-#include "SDL.h"
-#include "SDL_image.h"
+#include "SDL/include/SDL.h"
+#include "SDL_image/Include/SDL_image.h"
+#include "SDL_Mixer/Include/SDL_mixer.h"
 
 
 #pragma comment(lib, "SDL/libx86/SDL2.lib")
 #pragma comment(lib, "SDL/libx86/SDL2main.lib")
-#pragma comment(lib, "SDL_Image/libx86/SDL2_image")
+#pragma comment(lib, "SDL_Image/libx86/SDL2_image.lib")
+#pragma comment(lib, "SDL_Mixer/libx86/SDL2_mixer.lib")
 
 #define SHAPE_SIZE 16
 #define SCREEN_WIDTH  1280
-#define SCREEN_HEIGHT  960
+#define SCREEN_HEIGHT  760
 
 int main(int argc, char* args[]) {
 	int SDL_Init(SDL_INIT_VIDEO);
 	int IMG_Init(IMG_INIT_PNG);
+	int	Mix_Init(MIX_INIT_OGG);
+	Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024);
+
 	float vel = 30;
 	bool sumarx = true, sumary = true, shoot = false, right = false, left = false, up = false, down = false, recarga = true;
 
@@ -38,6 +43,9 @@ int main(int argc, char* args[]) {
 	SDL_Rect DestR;
 	SDL_Rect SrcProj;
 	SDL_Rect DestProj;
+
+	Mix_Music *shootSE;
+	Mix_Chunk *backMus;
 
 	bool quit = false;
 /*
@@ -100,6 +108,15 @@ int main(int argc, char* args[]) {
 	Bullet = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
 	SDL_FreeSurface(Loading_Surf);
 	
+	shootSE = Mix_LoadMUS("Assets/bulletSE.wav");
+	if (!shootSE) {
+		quit = true;
+	}
+	backMus = Mix_LoadWAV("Assets/Backmusic.ogg");
+	if (!backMus) {
+		quit = true;
+	}
+	Mix_PlayChannel(-1, backMus, 0);
 	//***GAME LOOP***
 	while (!quit)
 	{ 
@@ -112,66 +129,29 @@ int main(int argc, char* args[]) {
 			}
 			
 		}
-//Events
-			if (state[SDL_SCANCODE_UP]) {
-				up = true;
+
+			if (state[SDL_SCANCODE_SPACE]) {
+				shoot = true;
 			}
-			if (state[SDL_SCANCODE_DOWN]) {
-				down = true;
-			}
+					
 			if (state[SDL_SCANCODE_RIGHT]) {
 				right = true;
 			}
 			if (state[SDL_SCANCODE_LEFT]) {
 				left = true;
 			}
-			if (state[SDL_SCANCODE_SPACE]) {
-				shoot = true;
+			if (state[SDL_SCANCODE_UP]) {
+				up = true;
 			}
+			if (state[SDL_SCANCODE_DOWN]) {
+				down = true;
+			}
+
 			if (state[SDL_SCANCODE_ESCAPE]) {
 				quit = true;
 			}
-			
-			//Simultaneous events
-			if (state[SDL_SCANCODE_DOWN] && state[SDL_SCANCODE_SPACE]) {
-				down = true;
-				shoot= true;
-			}
-			if (state[SDL_SCANCODE_DOWN] && state[SDL_SCANCODE_LEFT]) {
-				down = true;
-				left = true;
-			}
-			if (state[SDL_SCANCODE_DOWN] && state[SDL_SCANCODE_RIGHT]) {
-				down = true;
-				right = true;
-			}
-
-			if (state[SDL_SCANCODE_UP] && state[SDL_SCANCODE_SPACE]) {
-				up = true;
-				shoot = true;
-			}
-			if (state[SDL_SCANCODE_UP] && state[SDL_SCANCODE_LEFT]) {
-				up = true;
-				left = true;
-			}
-			if (state[SDL_SCANCODE_UP] && state[SDL_SCANCODE_RIGHT]) {
-				up = true;
-				right = true;
-			}
-			if (state[SDL_SCANCODE_RIGHT] && state[SDL_SCANCODE_SPACE]) {
-				right = true;
-				shoot = true;
-			}
-			if (state[SDL_SCANCODE_LEFT] && state[SDL_SCANCODE_SPACE]) {
-				left = true;
-				shoot = true;
-			}
-			if (state[SDL_SCANCODE_LEFT] && state[SDL_SCANCODE_RIGHT]) {
-				right = true;
-				left = true;
-			}
-	//POSITION CHANGES
-																		//Red rectangle
+	
+	//POSITION CHANGES															
 	if (up == true && DestR.y > 0) {
 		DestR.y -= 10;
 		up = false;
@@ -189,9 +169,9 @@ int main(int argc, char* args[]) {
 		left = false;
 	}
 
-
-	if (shoot == true) {										//Green rectangle
+	if (shoot == true) {
 		if (recarga == true){
+			Mix_PlayMusic(shootSE , 0);
 			DestProj.x = DestR.x+ 70;
 			DestProj.y = DestR.y+50;
 			recarga = false;
@@ -199,12 +179,13 @@ int main(int argc, char* args[]) {
 		DestProj.x += vel;
 		if (DestProj.x > SCREEN_WIDTH + 100) {
 			shoot = false;
-			DestProj.x = DestR.x+ 70;
+			DestProj.x = DestR.x+70;
 			DestProj.y = DestR.y+50;
 			recarga = true;
 		}
 	}
-
+	
+	
 
 	//DRAW ON SCREEN
 /*	SDL_SetRenderDrawColor(Main_Renderer, 0, 0, 0xff, 0xff);
@@ -224,13 +205,17 @@ int main(int argc, char* args[]) {
 	SDL_RenderPresent(Main_Renderer);												//Show renders
 }
 //Free resources and close SDL
-	//SDL_DestroyTexture(Image);
-
+	Mix_FreeMusic(shootSE);	Mix_FreeChunk(backMus);
+	SDL_DestroyTexture(Image);
+	SDL_DestroyTexture(Background);
+	SDL_DestroyTexture(Bullet);
 	SDL_DestroyRenderer(Main_Renderer);
 	SDL_DestroyWindow(gWindow);
 	gWindow = NULL;
 
 //Quit SDL subsystems
+	Mix_CloseAudio();
+	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
 	return 0;
