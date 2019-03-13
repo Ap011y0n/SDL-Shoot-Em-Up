@@ -15,6 +15,9 @@
 #define SCREEN_HEIGHT  760
 #define BULLETNUM 5
 #define BULLETDELAY 10
+#define ENEMYNUM 10
+#define ENEMYDELAY 15
+
 
 
 int main(int argc, char* args[]) {
@@ -22,10 +25,13 @@ int main(int argc, char* args[]) {
 	int IMG_Init(IMG_INIT_PNG);
 	int	Mix_Init(MIX_INIT_OGG);
 	Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024);
-	int i, j = 0, cont = BULLETDELAY;
+	int i, p = 0, j = 0, cont = BULLETDELAY, cont2 = ENEMYDELAY, conty[ENEMYNUM], posinicial = SCREEN_HEIGHT/2, movy[ENEMYNUM];
 	float vel = 30;
-	bool sumarx = true, sumary = true, shoot = false, right = false, left = false, up = false, down = false, recarga = true;
-
+	bool sumarx = true, sumary = true, shoot = false, right = false, left = false, up = false, down = false, recarga = true, respawn = true;
+	for (i = 0; i < ENEMYNUM; i++) {
+		conty[i] = 10;
+		movy[i] = 2;
+	}
 
 	SDL_Window* gWindow;				//The window we'll be rendering to
 
@@ -39,11 +45,15 @@ int main(int argc, char* args[]) {
 	SDL_Texture* Image;
 	SDL_Texture* Background;
 	SDL_Texture* Bullet[BULLETNUM];
+	SDL_Texture* Enemy[ENEMYNUM];
+
 
 	SDL_Rect SrcR;
 	SDL_Rect DestR;
 	SDL_Rect SrcProj;
 	SDL_Rect DestProj[BULLETNUM];
+	SDL_Rect SrcEnem;
+	SDL_Rect DestEnem[ENEMYNUM];
 
 	Mix_Music *shootSE;
 	Mix_Chunk *backMus;
@@ -74,12 +84,25 @@ int main(int argc, char* args[]) {
 	SrcProj.w = 410;
 	SrcProj.h = 250;
 
-	for (i=0;i< BULLETNUM;i++){
-	DestProj[i].x = 2000;
-	DestProj[i].y = 2000;
-	DestProj[i].w = 125;
-	DestProj[i].h = 70;
-}
+	for (i = 0; i < BULLETNUM; i++) {
+		DestProj[i].x = 2000;
+		DestProj[i].y = 2000;
+		DestProj[i].w = 125;
+		DestProj[i].h = 70;
+	}
+	SrcEnem.x = 0;
+	SrcEnem.y = 0;
+	SrcEnem.w = 410;
+	SrcEnem.h = 250;
+
+	for (i = 0; i < ENEMYNUM; i++) {
+		DestEnem[i].x = 2000;
+		DestEnem[i].y = 2000;
+		DestEnem[i].w = 125;
+		DestEnem[i].h = 70;
+	}
+
+
 	gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	Main_Renderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_PRESENTVSYNC);
 	//Event handler
@@ -112,6 +135,18 @@ int main(int argc, char* args[]) {
 	if (!Loading_Surf) {
 		quit = true;
 	}
+
+	Loading_Surf = IMG_Load("Assets/enemy.png");
+	if (!Loading_Surf) {
+		quit = true;
+	}
+	for (i = 0; i < ENEMYNUM; i++) {
+		Enemy[i] = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
+	}
+	if (!Loading_Surf) {
+		quit = true;
+	}
+
 	SDL_FreeSurface(Loading_Surf);
 
 	shootSE = Mix_LoadMUS("Assets/bulletSE.wav");
@@ -182,18 +217,67 @@ int main(int argc, char* args[]) {
 			recarga = true;
 			shoot = false;
 			cont = 0;
-				Mix_PlayMusic(shootSE, 0);
-				DestProj[j].x = DestR.x + 70;
-				DestProj[j].y = DestR.y + 50;
-				
-				j++;
-				if (j >= BULLETNUM) {
-					j = 0;
-				}
+			Mix_PlayMusic(shootSE, 0);
+			DestProj[j].x = DestR.x + 70;
+			DestProj[j].y = DestR.y + 50;
+
+			j++;
+			if (j >= BULLETNUM) {
+				j = 0;
+			}
 		}
-		for (i = 0; i < BULLETNUM; i++){
+		for (i = 0; i < BULLETNUM; i++) {
 			DestProj[i].x += vel;
-}
+		}
+
+		//POSICION INICIAL
+
+		cont2++;
+
+		if (respawn == true) {
+			if (cont2 > ENEMYDELAY) {
+				cont2 = 0;
+				DestEnem[p].x = 1280;
+				DestEnem[p].y = SCREEN_HEIGHT / 2;
+				p++;
+				if (p == ENEMYNUM - 1) {
+					p = 0;
+					respawn = false;
+				}
+			}
+		}
+		//VELOCIDAD EN X
+		//VELOCIDAD EN Y
+			//VELOCIDAD EN Y
+	
+
+		for (i = 0; i < ENEMYNUM; i++) {
+		DestEnem[i].x -= 8;
+
+	if (DestEnem[i].x < 1000){
+			if (conty[i] <= 5) {
+				movy[i]++;
+			}
+			if ( conty[i] >= 30) {
+				movy[i]++;
+			}
+			if (movy[i] % 2 != 0) {
+				conty[i]--;
+				DestEnem[i].y -= 3;
+			}
+			else {
+				conty[i]++;
+				DestEnem[i].y+=3;
+			}
+			
+	}
+
+		
+		}
+
+
+
+
 
 		//DRAW ON SCREEN
 	/*	SDL_SetRenderDrawColor(Main_Renderer, 0, 0, 0xff, 0xff);
@@ -204,19 +288,24 @@ int main(int argc, char* args[]) {
 		SDL_RenderCopy(Main_Renderer, Background, NULL, NULL);
 		SDL_RenderCopy(Main_Renderer, Image, &SrcR, &DestR);
 
-		for (i=0;i<BULLETNUM;i++){
-		SDL_RenderCopy(Main_Renderer, Bullet[i], &SrcProj, &DestProj[i]);
+		for (i = 0; i < BULLETNUM; i++) {
+			SDL_RenderCopy(Main_Renderer, Bullet[i], &SrcProj, &DestProj[i]);
+		}
+		for (i = 0; i < ENEMYNUM; i++) {
+			SDL_RenderCopy(Main_Renderer, Enemy[i], &SrcEnem, &DestEnem[i]);
 		}
 		SDL_RenderPresent(Main_Renderer);												//Show renders
 	}
+
+
 	//Free resources and close SDL
 	Mix_FreeMusic(shootSE);	Mix_FreeChunk(backMus);
 	SDL_DestroyTexture(Image);
 	SDL_DestroyTexture(Background);
 	for (i = 0; i < BULLETNUM; i++) {
-	SDL_DestroyTexture(Bullet[i]);
+		SDL_DestroyTexture(Bullet[i]);
 	}
-	
+
 	SDL_DestroyRenderer(Main_Renderer);
 	SDL_DestroyWindow(gWindow);
 	gWindow = NULL;
