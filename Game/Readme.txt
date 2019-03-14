@@ -1,3 +1,3 @@
-The project: Rectangle, consists on a red rectangle which moves across the screen
-
-Suported by SDL 2.0
+arrows to move around the map
+spacebar to shoot
+Kill the boss and do not get hit

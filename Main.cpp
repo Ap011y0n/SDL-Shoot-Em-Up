@@ -189,7 +189,7 @@ int main(int argc, char* args[]) {
 	}
 
 
-	gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	gWindow = SDL_CreateWindow("My Awesome Game :D", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	Main_Renderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_PRESENTVSYNC);
 	//Event handler
 	SDL_Event event;
@@ -425,7 +425,7 @@ int main(int argc, char* args[]) {
 		cont2++;
 		if (respawn == true) {
 			if (generatenum == true) {
-				randomy = 300 + rand() % SCREEN_HEIGHT - 200;
+				randomy = 300 + rand() % SCREEN_HEIGHT - 600;
 				generatenum = false;
 			}
 			if (cont2 > ENEMYDELAY) {
@@ -471,7 +471,7 @@ int main(int argc, char* args[]) {
 		cont3++;
 		if (respawn2 == true) {
 			if (generatenum == true) {
-				randomy = 300 + rand() % SCREEN_HEIGHT - 200;
+				randomy = 300 + rand() % SCREEN_HEIGHT - 600;
 				generatenum = false;
 			}
 			if (cont3 > ENEMYDELAY) {
@@ -520,8 +520,8 @@ int main(int argc, char* args[]) {
 			showboss = true;
 			if (cont4 > BOSSDELAY && Bossdest.x <= SCREEN_WIDTH - 500) {
 
-				Bossprojdest[s].x = Bossdest.x;
-				Bossprojdest[s].y = 300;
+				Bossprojdest[s].x = Bossdest.x+100;
+				Bossprojdest[s].y = 400;
 					cont4 = 0;
 					if (s==0){
 						for (i = 0; i < BOSSPROJNUM; i++) {
