@@ -1,10 +1,11 @@
 ﻿  Main.cpp
-c:\users\albertgb7\documents\github\my-awesome-game\main.cpp(242): warning C4244: '+=': conversion from 'float' to 'int', possible loss of data
-c:\users\albertgb7\documents\github\my-awesome-game\main.cpp(46): warning C4101: 'projectile': unreferenced local variable
-c:\users\albertgb7\documents\github\my-awesome-game\main.cpp(44): warning C4101: 'rectangle': unreferenced local variable
+c:\users\albert\documents\github\my-awesome-game\main.cpp(25): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\albert\documents\github\my-awesome-game\main.cpp(307): warning C4244: '+=': conversion from 'float' to 'int', possible loss of data
+c:\users\albert\documents\github\my-awesome-game\main.cpp(48): warning C4101: 'projectile': unreferenced local variable
+c:\users\albert\documents\github\my-awesome-game\main.cpp(46): warning C4101: 'rectangle': unreferenced local variable
   Generating code
-  1 of 1 functions (100.0%) were compiled.
+  1 of 2 functions (50.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  Rectangulo.vcxproj -> C:\Users\albertgb7\Documents\GitHub\My-Awesome-Game\Release\Rectangulo.exe
+  Rectangulo.vcxproj -> C:\Users\Albert\Documents\GitHub\My-Awesome-Game\Release\Rectangulo.exe
