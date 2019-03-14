@@ -18,46 +18,42 @@
 #define BULLETDELAY 7
 #define ENEMYNUM 6
 #define ENEMYDELAY 15
+#define BOSSDELAY 10
+#define BOSSPROJNUM 100
 
 
 
 int main(int argc, char* args[]) {
-	srand(time(NULL));
-	int SDL_Init(SDL_INIT_VIDEO);
-	int IMG_Init(IMG_INIT_PNG);
-	int	Mix_Init(MIX_INIT_OGG);
-	Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024);
-	int i, hp = 5, a, p = 0, j = 0, d = 1, cont = BULLETDELAY, cont2 = ENEMYDELAY, cont3 = ENEMYDELAY, conty[ENEMYNUM], conty2[ENEMYNUM], posinicial = SCREEN_HEIGHT/2, movy[ENEMYNUM], movy2[ENEMYNUM], respawntimer1 = 500, respawntimer2 = 0, randomy;
-	float vel = 30;
-	bool sumarx = true, sumary = true, shoot = false, right = false, left = false, up = false, down = false, recarga = true, respawn = false, respawn2 = false, generatenum = true;
-	for (i = 0; i < ENEMYNUM; i++) {
-		conty[i] = 10;
-		movy[i] = 2;
-	}
-	for (i = 0; i < ENEMYNUM; i++) {
-		conty2[i] = 10;
-		movy[i] = 2;
-	}
 
 	SDL_Window* gWindow;				//The window we'll be rendering to
 
 	SDL_Renderer* Main_Renderer;		//The surface contained by the window
-
-	SDL_Rect rectangle;					//The render controlled by the player
-
-	SDL_Rect projectile;				//Projectile we will shoot with space
 	SDL_Surface * Loading_Surf;
 
 	SDL_Texture* Image;
-	SDL_Texture* Background;
+	SDL_Texture* Background0;
+	SDL_Texture* Background1;
+	SDL_Texture* Background2;
+	SDL_Texture* Background1bis;
+	SDL_Texture* Background2bis;
 	SDL_Texture* Gameover;
+	SDL_Texture* Win;
 	SDL_Texture* Bullet[BULLETNUM];
 	SDL_Texture* Enemy[ENEMYNUM];
 	SDL_Texture* Enemy2[ENEMYNUM];
 	SDL_Texture* Health[5];
+	SDL_Texture* Boss;
+	SDL_Texture* projboss[BOSSPROJNUM];
 
+	SDL_Rect Bossdest;
+	SDL_Rect Bossprojdest[BOSSPROJNUM];
+	SDL_Rect Backcoord;
+	SDL_Rect Backcoord2;
+	SDL_Rect Backcoordbis;
+	SDL_Rect Backcoordbis2;
 	SDL_Rect GOsrc;
 	SDL_Rect GOdest;
+	SDL_Rect Windest;
 	SDL_Rect HPsrc;
 	SDL_Rect HPdest[5];
 	SDL_Rect SrcR;
@@ -71,21 +67,60 @@ int main(int argc, char* args[]) {
 	Mix_Music *shootSE;
 	Mix_Music *hit;
 	Mix_Music *hit2;
-	Mix_Music *defeat;
+
 	Mix_Chunk *backMus;
-	
+
+	srand(time(NULL));
+	int SDL_Init(SDL_INIT_VIDEO);
+	int IMG_Init(IMG_INIT_PNG);
+	int	Mix_Init(MIX_INIT_OGG);
+	Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024);
+	int i, s = 0, hp = 5, a, p = 0, j = 0, d = 1, cont = BULLETDELAY, cont2 = ENEMYDELAY, cont3 = ENEMYDELAY, cont4 = BOSSDELAY, conty[ENEMYNUM], conty2[ENEMYNUM], posinicial = SCREEN_HEIGHT / 2, movy[ENEMYNUM], movy2[ENEMYNUM], respawntimer1 = 500, respawntimer2 = 0, randomy;
+	int vel = 30, round = 0, y[BOSSPROJNUM], yneg[BOSSPROJNUM], bosshp=200;
+	bool sumarx = true, sumary = true, shoot = false, right = false, left = false, up = false, down = false, recarga = true, respawn = false, respawn2 = false, generatenum = true, bossphase = false, showboss = true, showship = true;
+	for (i = 0; i < ENEMYNUM; i++) {
+		conty[i] = 10;
+		movy[i] = 2;
+	}
+	for (i = 0; i < ENEMYNUM; i++) {
+		conty2[i] = 10;
+		movy[i] = 2;
+	}
 
 	bool quit = false;
-	/*
-		rectangle.x = 20;
-		rectangle.y = 20;
-		rectangle.w = 200;
-		rectangle.h = 100;
-		projectile.x = rectangle.x + 150;
-		projectile.y = rectangle.y + 30;
-		projectile.w = 100;
-		projectile.h = 40;
-	*/
+
+	Bossdest.x = SCREEN_WIDTH + 100;
+	Bossdest.y = 60;
+	Bossdest.h = SCREEN_HEIGHT;
+	Bossdest.w = Bossdest.h + 100;
+	for (i = 0; i < BOSSPROJNUM; i++) {
+		Bossprojdest[i].x = 3000;
+		Bossprojdest[i].y = 3000;
+		Bossprojdest[i].h = 50;
+		Bossprojdest[i].w = 80;
+	}
+
+	Backcoord.x = 0;
+	Backcoord.y = 0;
+	Backcoord.w = SCREEN_WIDTH;
+	Backcoord.h = SCREEN_HEIGHT;
+
+	Backcoord2.x = 0;
+	Backcoord2.y = 0;
+	Backcoord2.w = SCREEN_WIDTH;
+	Backcoord2.h = SCREEN_HEIGHT;
+
+	Backcoordbis.x = SCREEN_WIDTH;
+	Backcoordbis.y = 0;
+	Backcoordbis.w = SCREEN_WIDTH;
+	Backcoordbis.h = SCREEN_HEIGHT;
+
+	Backcoordbis2.x = SCREEN_WIDTH;
+	Backcoordbis2.y = 0;
+	Backcoordbis2.w = SCREEN_WIDTH;
+	Backcoordbis2.h = SCREEN_HEIGHT;
+
+
 	GOsrc.x = 0;
 	GOsrc.y = 0;
 	GOsrc.h = 480;
@@ -93,15 +128,21 @@ int main(int argc, char* args[]) {
 
 	GOdest.w = 580;
 	GOdest.h = 350;
-	GOdest.x = SCREEN_WIDTH / 2 - GOdest.w/2 - 60;
-	GOdest.y = SCREEN_HEIGHT / 2 - GOdest.h/2;
-	
+	GOdest.x = SCREEN_WIDTH / 2 - GOdest.w / 2 - 60;
+	GOdest.y = SCREEN_HEIGHT / 2 - GOdest.h / 2;
+
+	Windest.w = 580;
+	Windest.h = 350;
+	Windest.x = SCREEN_WIDTH / 2 - Windest.w / 2 - 60;
+	Windest.y = SCREEN_HEIGHT / 2 - Windest.h / 2;
+
 	HPsrc.x = 0;
 	HPsrc.y = 0;
 	HPsrc.h = 413;
 	HPsrc.w = 549;
+
 	for (i = 0; i < 5; i++) {
-		HPdest[i].x = 0+p;
+		HPdest[i].x = 0 + p;
 		HPdest[i].y = 30;
 		HPdest[i].h = 50;
 		HPdest[i].w = 70;
@@ -113,8 +154,8 @@ int main(int argc, char* args[]) {
 	SrcR.w = 580;
 	SrcR.h = 793;
 
-	DestR.x = SCREEN_WIDTH / 2;
-	DestR.y = 50;
+	DestR.x = 50;
+	DestR.y = SCREEN_HEIGHT/2;
 	DestR.w = 150;
 	DestR.h = 150;
 
@@ -127,7 +168,7 @@ int main(int argc, char* args[]) {
 		DestProj[i].x = 2000;
 		DestProj[i].y = 2000;
 		DestProj[i].w = 75;
-		DestProj[i].h = 20;
+		DestProj[i].h = 45;
 	}
 	SrcEnem.x = 0;
 	SrcEnem.y = 0;
@@ -154,18 +195,62 @@ int main(int argc, char* args[]) {
 	SDL_Event event;
 
 	//crea textura fondo
-	Loading_Surf = IMG_Load("Assets/back.png");
+	Loading_Surf = IMG_Load("Assets/backlayer0.png");
 	if (!Loading_Surf) {
 		quit = true;
 	}
-	Background = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
+	Background0 = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
 	SDL_FreeSurface(Loading_Surf);
 
+	Loading_Surf = IMG_Load("Assets/backlayer1.png");
+	if (!Loading_Surf) {
+		quit = true;
+	}
+	Background1 = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
+	SDL_FreeSurface(Loading_Surf);
+	Loading_Surf = IMG_Load("Assets/backlayer1.png");
+	if (!Loading_Surf) {
+		quit = true;
+	}
+	Background1bis = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
+	SDL_FreeSurface(Loading_Surf);
+
+	Loading_Surf = IMG_Load("Assets/backlayer2.png");
+	if (!Loading_Surf) {
+		quit = true;
+	}
+	Background2 = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
+	SDL_FreeSurface(Loading_Surf);
+
+	Loading_Surf = IMG_Load("Assets/backlayer2.png");
+	if (!Loading_Surf) {
+		quit = true;
+	}
+	Background2bis = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
+	SDL_FreeSurface(Loading_Surf);
+
+	Loading_Surf = IMG_Load("Assets/boss.png");
+	if (!Loading_Surf) {
+		quit = true;
+	}
+	Boss = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
+	SDL_FreeSurface(Loading_Surf);
+
+	Loading_Surf = IMG_Load("Assets/bala2.png");
+	if (!Loading_Surf) {
+		quit = true;
+	}
+	for (i=0;i< BOSSPROJNUM;i++){
+	projboss[i] = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
+}
+	SDL_FreeSurface(Loading_Surf);
 
 	Loading_Surf = IMG_Load("Assets/player.png");
 	if (!Loading_Surf) {
 		quit = true;
 	}
+
+
 	Image = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
 	SDL_FreeSurface(Loading_Surf);
 
@@ -174,6 +259,13 @@ int main(int argc, char* args[]) {
 		quit = true;
 	}
 	Gameover = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
+	SDL_FreeSurface(Loading_Surf);
+
+	Loading_Surf = IMG_Load("Assets/win.png");
+	if (!Loading_Surf) {
+		quit = true;
+	}
+	Win = SDL_CreateTextureFromSurface(Main_Renderer, Loading_Surf);
 	SDL_FreeSurface(Loading_Surf);
 
 
@@ -266,7 +358,7 @@ int main(int argc, char* args[]) {
 			quit = true;
 		}
 		
-	if(hp > 0){
+	if(hp > 0 && bosshp > 0){
 
 		//POSITION CHANGES															
 		if (up == true && DestR.y > 0) {
@@ -285,6 +377,8 @@ int main(int argc, char* args[]) {
 			DestR.x -= 10;
 			left = false;
 		}
+
+		showship = true;
 		cont++;
 		if (shoot == true && cont <= BULLETDELAY) {
 			shoot = false;
@@ -306,7 +400,23 @@ int main(int argc, char* args[]) {
 			DestProj[i].x += vel;
 		}
 
-		//POSICION INICIAL
+		Backcoord.x--;
+		Backcoordbis.x--;
+		Backcoord2.x -= 5;
+		Backcoordbis2.x -= 5;
+		if (Backcoord.x < 0 - SCREEN_WIDTH) {
+			Backcoord.x = SCREEN_WIDTH;
+		}
+		if (Backcoord2.x < 0 - SCREEN_WIDTH) {
+			Backcoord2.x = SCREEN_WIDTH;
+		}
+		if (Backcoordbis.x < 0 - SCREEN_WIDTH) {
+			Backcoordbis.x = SCREEN_WIDTH;
+		}
+		
+		if (Backcoordbis2.x < 0 - SCREEN_WIDTH) {
+			Backcoordbis2.x = SCREEN_WIDTH;
+		}
 		//Linea de enemigos 1
 		respawntimer1++;
 		if (respawntimer1 > 200) {
@@ -315,7 +425,7 @@ int main(int argc, char* args[]) {
 		cont2++;
 		if (respawn == true) {
 			if (generatenum == true) {
-				randomy = 100 + rand() % SCREEN_HEIGHT - 200;
+				randomy = 300 + rand() % SCREEN_HEIGHT - 200;
 				generatenum = false;
 			}
 			if (cont2 > ENEMYDELAY) {
@@ -361,7 +471,7 @@ int main(int argc, char* args[]) {
 		cont3++;
 		if (respawn2 == true) {
 			if (generatenum == true) {
-				randomy = 100 + rand() % SCREEN_HEIGHT - 200;
+				randomy = 300 + rand() % SCREEN_HEIGHT - 200;
 				generatenum = false;
 			}
 			if (cont3 > ENEMYDELAY) {
@@ -374,6 +484,7 @@ int main(int argc, char* args[]) {
 					respawn2 = false;
 					respawntimer2 = false;
 					generatenum = true;
+					round++;
 				}
 			}
 		}
@@ -399,9 +510,40 @@ int main(int argc, char* args[]) {
 
 			}
 		}
+		
+		if (Bossdest.x > SCREEN_WIDTH -500 && round >2 ) {
+			Bossdest.x-=4;
+			 bossphase = true;
+		}	
+		if (bossphase == true) {
+			cont4++;
+			showboss = true;
+			if (cont4 > BOSSDELAY && Bossdest.x <= SCREEN_WIDTH - 500) {
+
+				Bossprojdest[s].x = Bossdest.x;
+				Bossprojdest[s].y = 300;
+					cont4 = 0;
+					if (s==0){
+						for (i = 0; i < BOSSPROJNUM; i++) {
+							y[i] = rand() % 15;
+							yneg[i] = rand() % 15;
+					}
+					}
+					s++;
+					if (s == BOSSPROJNUM) {
+						s = 0;
+					}
+			}
+			
+			for (i = 0; i < BOSSPROJNUM; i++) {
+				Bossprojdest[i].x -=6;
+				Bossprojdest[i].y += y[i];
+				Bossprojdest[i].y -= yneg[i];
+			}
+		}
 		for (i = 0; i < ENEMYNUM; i++) {
 			for (a = 0; a < BULLETNUM; a++) {
-				if (DestProj[a].y > DestEnem[i].y - 50 && DestProj[a].y < DestEnem[i].y + 50 && DestProj[a].x > DestEnem[i].x - 35 && DestProj[a].x < DestEnem[i].x + 35) {
+				if (DestProj[a].y > DestEnem[i].y && DestProj[a].y < DestEnem[i].y + 90 && DestProj[a].x > DestEnem[i].x && DestProj[a].x < DestEnem[i].x + 125) {
 					DestEnem[i].y += 5000;
 					DestProj[a].y += 6000;
 					Mix_PlayMusic(hit2, 0);
@@ -411,7 +553,7 @@ int main(int argc, char* args[]) {
 		}
 		for (i = 0; i < ENEMYNUM; i++) {
 			for (a = 0; a < BULLETNUM; a++) {
-				if (DestProj[a].y > DestEnem2[i].y - 50 && DestProj[a].y < DestEnem2[i].y + 50 && DestProj[a].x > DestEnem2[i].x - 35 && DestProj[a].x < DestEnem2[i].x + 35) {
+				if (DestProj[a].y > DestEnem2[i].y && DestProj[a].y < DestEnem2[i].y + 90 && DestProj[a].x > DestEnem2[i].x && DestProj[a].x < DestEnem2[i].x + 125) {
 					DestEnem2[i].y += 5000;
 					DestProj[a].y += 6000;
 					Mix_PlayMusic(hit2, 0);
@@ -420,30 +562,48 @@ int main(int argc, char* args[]) {
 		}
 
 		for (i = 0; i < ENEMYNUM; i++) {
-			if (DestEnem2[i].x > DestR.x - 100 && DestEnem2[i].x < DestR.x + 100 && DestEnem2[i].y > DestR.y - 50 && DestEnem2[i].y < DestR.y + 50) {
+			if (DestEnem2[i].x > DestR.x && DestEnem2[i].x < DestR.x +120 && DestEnem2[i].y > DestR.y + 30 && DestEnem2[i].y < DestR.y + 120) {
 				DestEnem2[i].y += 5000;
 				Mix_PlayMusic(hit, 0);
 				hp--;
+				showship = false;
 			}
-			if (DestEnem[i].x > DestR.x - 100 && DestEnem[i].x < DestR.x + 100 && DestEnem[i].y > DestR.y - 50 && DestEnem[i].y < DestR.y + 50) {
+			if (DestEnem[i].x > DestR.x && DestEnem[i].x < DestR.x + 120 && DestEnem[i].y > DestR.y +30 && DestEnem[i].y < DestR.y + 120) {
 				DestEnem[i].y += 5000;
 				Mix_PlayMusic(hit, 0);
 				hp--;
+				showship = false;
+			}
+		}
+		for (i = 0; i < BOSSPROJNUM; i++) {
+			if (Bossprojdest[i].x > DestR.x && Bossprojdest[i].x < DestR.x + 100 && Bossprojdest[i].y > DestR.y +50 && Bossprojdest[i].y < DestR.y + 100) {
+				Bossprojdest[i].y += 5000;
+				Mix_PlayMusic(hit, 0);
+				hp--;
+				showship = false;
 			}
 		}
 
+		for (i = 0; i < BULLETNUM; i++) {
+			
+				if (DestProj[i].x >= Bossdest.x && DestProj[i].x <= Bossdest.x +50 && Bossdest.x <= SCREEN_WIDTH - 500) {
+					DestProj[a].y += 6000;
+					Mix_PlayMusic(hit2, 0);
+					showboss = false;
+					bosshp--;
+				
+			}
+		}
 	}
-
-
-
-		//DRAW ON SCREEN
-	/*	SDL_SetRenderDrawColor(Main_Renderer, 0, 0, 0xff, 0xff);
-		SDL_RenderClear(Main_Renderer);
-		SDL_SetRenderDrawColor(Main_Renderer, 255, 0, 0, 0);							//Draw red rectangle, color
-		SDL_RenderFillRect(Main_Renderer, &rectangle);									//Size
-		*/
-		SDL_RenderCopy(Main_Renderer, Background, NULL, NULL);
-		SDL_RenderCopy(Main_Renderer, Image, &SrcR, &DestR);
+		SDL_RenderCopy(Main_Renderer, Background0, NULL, NULL);
+		SDL_RenderCopy(Main_Renderer, Background1, NULL, &Backcoord);
+		SDL_RenderCopy(Main_Renderer, Background1, NULL, &Backcoordbis);
+		SDL_RenderCopy(Main_Renderer, Background2, NULL, &Backcoord2);
+		SDL_RenderCopy(Main_Renderer, Background2, NULL, &Backcoordbis2);
+		if (showboss == true) { SDL_RenderCopy(Main_Renderer, Boss, NULL, &Bossdest); }
+		for (i=0;i< BOSSPROJNUM;i++){
+		SDL_RenderCopy(Main_Renderer, projboss[i], NULL, &Bossprojdest[i]);}
+		if (showship == true) { SDL_RenderCopy(Main_Renderer, Image, &SrcR, &DestR); }
 
 		for (i = 0; i < BULLETNUM; i++) {
 			SDL_RenderCopy(Main_Renderer, Bullet[i], &SrcProj, &DestProj[i]);
@@ -464,18 +624,36 @@ int main(int argc, char* args[]) {
 			Mix_HaltChannel(-1);
 			hp = -1;
 		}
-		SDL_RenderPresent(Main_Renderer);												//Show renders
+		if (bosshp <= 0) {
+			SDL_RenderCopy(Main_Renderer, Win, NULL, &Windest);
+		}
+		SDL_RenderPresent(Main_Renderer);
 	}
 
 
 	//Free resources and close SDL
-	Mix_FreeMusic(shootSE);	Mix_FreeChunk(backMus);
-	SDL_DestroyTexture(Image);
-	SDL_DestroyTexture(Background);
+	Mix_FreeChunk(backMus);
+	Mix_FreeMusic(shootSE);
+	Mix_FreeMusic(hit);
+	Mix_FreeMusic(hit2);
+
+	for (i = 0; i < ENEMYNUM; i++) {
+		SDL_DestroyTexture(Enemy[i]);
+	}
 	for (i = 0; i < BULLETNUM; i++) {
 		SDL_DestroyTexture(Bullet[i]);
 	}
-
+	for (i = 0; i < 5; i++) {
+		SDL_DestroyTexture(Health[i]);
+	}
+	SDL_DestroyTexture(Boss);
+	SDL_DestroyTexture(Image);
+	SDL_DestroyTexture(Gameover);
+	SDL_DestroyTexture(Background2bis);
+	SDL_DestroyTexture(Background1bis);
+	SDL_DestroyTexture(Background2);
+	SDL_DestroyTexture(Background1);
+	SDL_DestroyTexture(Background0);
 	SDL_DestroyRenderer(Main_Renderer);
 	SDL_DestroyWindow(gWindow);
 	gWindow = NULL;
