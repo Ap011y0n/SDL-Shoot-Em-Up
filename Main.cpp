@@ -15,7 +15,7 @@
 #define SCREEN_HEIGHT  760
 #define BULLETNUM 5
 #define BULLETDELAY 10
-#define ENEMYNUM 10
+#define ENEMYNUM 6
 #define ENEMYDELAY 15
 
 
@@ -25,11 +25,15 @@ int main(int argc, char* args[]) {
 	int IMG_Init(IMG_INIT_PNG);
 	int	Mix_Init(MIX_INIT_OGG);
 	Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024);
-	int i, p = 0, j = 0, cont = BULLETDELAY, cont2 = ENEMYDELAY, conty[ENEMYNUM], posinicial = SCREEN_HEIGHT/2, movy[ENEMYNUM];
+	int i, a, p = 0, j = 0, d = 0, cont = BULLETDELAY, cont2 = ENEMYDELAY, cont3 = ENEMYDELAY, conty[ENEMYNUM], conty2[ENEMYNUM], posinicial = SCREEN_HEIGHT/2, movy[ENEMYNUM], movy2[ENEMYNUM], respawntimer1 = 500, respawntimer2 = 0;
 	float vel = 30;
-	bool sumarx = true, sumary = true, shoot = false, right = false, left = false, up = false, down = false, recarga = true, respawn = true;
+	bool sumarx = true, sumary = true, shoot = false, right = false, left = false, up = false, down = false, recarga = true, respawn = false, respawn2 = false;
 	for (i = 0; i < ENEMYNUM; i++) {
 		conty[i] = 10;
+		movy[i] = 2;
+	}
+	for (i = 0; i < ENEMYNUM; i++) {
+		conty2[i] = 10;
 		movy[i] = 2;
 	}
 
@@ -46,6 +50,7 @@ int main(int argc, char* args[]) {
 	SDL_Texture* Background;
 	SDL_Texture* Bullet[BULLETNUM];
 	SDL_Texture* Enemy[ENEMYNUM];
+	SDL_Texture* Enemy2[ENEMYNUM];
 
 
 	SDL_Rect SrcR;
@@ -54,6 +59,7 @@ int main(int argc, char* args[]) {
 	SDL_Rect DestProj[BULLETNUM];
 	SDL_Rect SrcEnem;
 	SDL_Rect DestEnem[ENEMYNUM];
+	SDL_Rect DestEnem2[ENEMYNUM];
 
 	Mix_Music *shootSE;
 	Mix_Chunk *backMus;
@@ -96,10 +102,16 @@ int main(int argc, char* args[]) {
 	SrcEnem.h = 250;
 
 	for (i = 0; i < ENEMYNUM; i++) {
-		DestEnem[i].x = 2000;
+		DestEnem[i].x = 6000;
 		DestEnem[i].y = 2000;
 		DestEnem[i].w = 125;
 		DestEnem[i].h = 70;
+	}
+	for (i = 0; i < ENEMYNUM; i++) {
+		DestEnem2[i].x = 6000;
+		DestEnem2[i].y = 2000;
+		DestEnem2[i].w = 125;
+		DestEnem2[i].h = 70;
 	}
 
 
@@ -231,9 +243,12 @@ int main(int argc, char* args[]) {
 		}
 
 		//POSICION INICIAL
-
+		//Linea de enemigos 1
+		respawntimer1++;
+		if (respawntimer1 > 300) {
+			respawn = true;
+		}
 		cont2++;
-
 		if (respawn == true) {
 			if (cont2 > ENEMYDELAY) {
 				cont2 = 0;
@@ -243,14 +258,11 @@ int main(int argc, char* args[]) {
 				if (p == ENEMYNUM - 1) {
 					p = 0;
 					respawn = false;
+					respawntimer1 = 0;
 				}
 			}
 		}
-		//VELOCIDAD EN X
-		//VELOCIDAD EN Y
-			//VELOCIDAD EN Y
 	
-
 		for (i = 0; i < ENEMYNUM; i++) {
 		DestEnem[i].x -= 8;
 
@@ -270,10 +282,69 @@ int main(int argc, char* args[]) {
 				DestEnem[i].y+=3;
 			}
 			
+	}		
+}
+
+		//Linea de enemigos 2
+	cont3++;
+	respawntimer2++;
+	if (respawntimer2 > 200) {
+		respawn2 = true;
+	}
+	if (respawn2 == true) {
+		if (cont3 > ENEMYDELAY) {
+			cont3 = 0;
+			DestEnem2[d].x = 1280;
+			DestEnem2[d].y = SCREEN_HEIGHT / 4;
+			d++;
+			if (d == ENEMYNUM - 1) {
+				d = 0;
+				respawn2 = false;
+				respawntimer2 = false;
+			}
+		}
 	}
 
-		
+	for (i = 0; i < ENEMYNUM; i++) {
+		DestEnem2[i].x -= 8;
+
+		if (DestEnem2[i].x < 1000) {
+			if (conty2[i] <= 5) {
+				movy2[i]++;
+			}
+			if (conty2[i] >= 30) {
+				movy2[i]++;
+			}
+			if (movy2[i] % 2 != 0) {
+				conty2[i]--;
+				DestEnem2[i].y -= 3;
+			}
+			else {
+				conty2[i]++;
+				DestEnem2[i].y += 3;
+			}
+
 		}
+	}
+	for (i = 0; i < ENEMYNUM; i++) {
+		for (a = 0; a< BULLETNUM; a++) {
+			if (DestProj[a].y > DestEnem[i].y - 25 && DestProj[a].y < DestEnem[i].y + 25 && DestProj[a].x > DestEnem[i].x - 25 && DestProj[a].x < DestEnem[i].x + 25) {
+				DestEnem[i].y += 5000;
+				DestProj[a].y += 6000;
+
+			}
+		}
+	}
+	for (i = 0; i < ENEMYNUM; i++) {
+		for (a = 0; a< BULLETNUM; a++) {
+			if (DestProj[a].y > DestEnem2[i].y - 25 && DestProj[a].y < DestEnem2[i].y + 25 && DestProj[a].x > DestEnem2[i].x - 25 && DestProj[a].x < DestEnem2[i].x + 25) {
+				DestEnem2[i].y += 5000;
+				DestProj[a].y += 6000;
+
+			}
+		}
+	}
+
 
 
 
@@ -294,6 +365,10 @@ int main(int argc, char* args[]) {
 		for (i = 0; i < ENEMYNUM; i++) {
 			SDL_RenderCopy(Main_Renderer, Enemy[i], &SrcEnem, &DestEnem[i]);
 		}
+		for (i = 0; i < ENEMYNUM; i++) {
+			SDL_RenderCopy(Main_Renderer, Enemy2[i], &SrcEnem, &DestEnem2[i]);
+		}
+		
 		SDL_RenderPresent(Main_Renderer);												//Show renders
 	}
 
